@@ -108,6 +108,6 @@ class PedersonData(ABLStats):
     self.z = a['z'].values * float(self.istats['zi'])
     self.hvelmag = a['hvelmag'].values
     a = pd.read_csv(dir_name+'/temperature_pedersen2014.txt',header=None,names=['T','z'],dtype=float)
-    self.T = np.interp(self.z, a['z'].values[::-1], a['T'].values[::-1])
+    self.T = np.interp(self.z, a['z'].values[:], a['T'].values[:])
 
         
