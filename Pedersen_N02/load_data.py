@@ -51,6 +51,16 @@ class NaluWindStats(ABLStats):
     temp_file = glob.glob(dir_name+'/*temperature.dat')[0]
     a = pd.read_csv(temp_file, sep='\s+', skiprows=1, names=['z','T'] )
     self.T = a['T'].values
+    restress_file = glob.glob(dir_name+'/*reynoldsstresses.dat')[0]
+    a = pd.read_csv(restress_file, sep='\s+', skiprows=1, names=['z','uu', 'uv', 'uw','vv','vw','ww','tke'] )
+    self.vel_var = {
+      "<u'u'>" : a["uu"],
+      "<u'v'>" : a["uv"],
+      "<u'w'>" : a["uw"],
+      "<v'v'>" : a["vv"],
+      "<v'w'>" : a["vw"],
+      "<w'w'>" : a["ww"],
+    }
 
     spectra_files = glob.glob(dir_name+'/*spectra*dat')
     self.ps_data = {
@@ -109,5 +119,13 @@ class PedersonData(ABLStats):
     self.hvelmag = a['hvelmag'].values
     a = pd.read_csv(dir_name+'/temperature_pedersen2014.txt',header=None,names=['T','z'],dtype=float)
     self.T = np.interp(self.z, a['z'].values[:], a['T'].values[:])
+    self.vel_var = {
+      "<u'u'>" : [],
+      "<u'v'>" : [],
+      "<u'w'>" : [],
+      "<v'v'>" : [],
+      "<v'w'>" : [],
+      "<w'w'>" : [],
+    }
 
         
