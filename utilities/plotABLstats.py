@@ -324,12 +324,15 @@ def plottkeprofile(data, figax, tlims=[], **kwargs):
     fieldstr='resolved_stress'
     #fieldstr='sfs_stress_tavg'
     uu = data.time_average(field=fieldstr, index=0, times=[t1, t2])
+    uv = data.time_average(field=fieldstr, index=1, times=[t1, t2])
+    uw = data.time_average(field=fieldstr, index=2, times=[t1, t2])
     vv = data.time_average(field=fieldstr, index=3, times=[t1, t2])
+    vw = data.time_average(field=fieldstr, index=4, times=[t1, t2])
     ww = data.time_average(field=fieldstr, index=5, times=[t1, t2])
     tke = 0.5*(uu+vv+ww)
     if 'exportdata' in kwargs: 
-        headers="z, uu, vv, ww, tke"
-        return np.vstack((z, uu, vv, ww, tke)).transpose(), headers
+        headers="z, uu, uv, uw, vv, vw, ww, tke"
+        return np.vstack((z, uu, uv, uw, vv, vw, ww, tke)).transpose(), headers
     figax.plot(uu, z, '-o', label='uu')
     figax.plot(vv, z, '-o', label='vv')
     figax.plot(ww, z, '-o', label='ww')
