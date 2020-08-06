@@ -7,7 +7,7 @@
 
 import netCDF4 as ncdf
 import numpy as np
-from scipy import interpolate
+from scipy import interpolate, optimize
 import math
 import re
 import os
@@ -565,6 +565,44 @@ def plotTIprofile(data, figax, tlims=[], **kwargs):
     else:                    plotdict = eval(paramentry.get())
     if 'ylims'    in plotdict: figax.set_ylim(plotdict['ylims'])
     return
+
+def  calcInversionHeight(data, heights=[], tlims=[]):
+    """Use algorithm by Pedersen (2014): 
+
+    The ABL height h is defined as the height where the horizontally
+    averaged stress ustar^2 = sqrt(<u'w'>^2 + <v'w'>^2) is reduced to
+    5% of the surface value ustar0.
+
+    """
+    if len(tlims)>0:
+        t1 = tlims[0]
+        t2 = tlims[1]
+    else:
+        t1 = float(t1entry.get())
+        t2 = float(t2entry.get())
+
+    # Get the surface value utau0
+    utau0    = data.time_average(field='utau', times=[t1, t2], zeroD=True)
+    # Get the reynolds stresses
+    z        = data.heights
+    fieldstr = 'resolved_stress'
+    uw       = data.time_average(field=fieldstr, index=2, times=[t1, t2])
+    vw       = data.time_average(field=fieldstr, index=4, times=[t1, t2])
+    # Calculate utau at height z
+    utauz    = np.power(uw**2 + vw**2, 0.25)
+
+    # Set the root finding function
+    f        = utauz - 0.05*utau0
+    interpf  = interpolate.interp1d(z, f)
+    # Use newton's method to find the zero
+    if ((heights is None) or len(heights))<0:    
+        # Starting guess at mid-way in the domain
+        guessz   = 0.5*(z[0]+z[-1])    
+    else:
+        guessz   = heights[0]
+    zi       = optimize.newton(interpf, guessz)
+    return zi, utauz
+    
 
 def reportABLstats(data, heights=[], tlims=[]):
     outdata=[]
