@@ -71,7 +71,21 @@ class NaluWindStats(ABLStats):
         "<v'w'>" : [],
         "<w'w'>" : [],
       }
-
+    if (len(glob.glob(dir_name+'/*temperaturefluxes.dat'))>0):
+      tfluxes_file = glob.glob(dir_name+'/*temperaturefluxes.dat')[0]
+      a = pd.read_csv(tfluxes_file, sep='\s+', skiprows=1, names=['z','Tu', 'Tv', 'Tw'] )
+      self.tflux_var = {
+        "<T'u'>" : a["Tu"],
+        "<T'v'>" : a["Tv"],
+        "<T'w'>" : a["Tw"],
+      }      
+    else:
+      self.tflux_var = {
+        "<T'u'>" : [],
+        "<T'v'>" : [],
+        "<T'w'>" : [],
+      }      
+  
     spectra_files = glob.glob(dir_name+'/*spectra*dat')
     self.ps_data = {
       'z': np.array(sorted([ float(pathlib.Path(i).stem.split('_')[-1][1:]) for i in spectra_files])),
@@ -104,6 +118,11 @@ class AMRWindStats(ABLStats):
       "<w'w'>" : a["<w'w'>"],
       "<w'w'w'>": a["<w'w'w'>"]
     }
+    self.tflux_var = {
+      "<T'u'>" : a["<temperature0'u'>"],
+      "<T'v'>" : a["<temperature0'v'>"],
+      "<T'w'>" : a["<temperature0'w'>"],
+    }      
     self.istats = yaml.load(open(dir_name+'/istats.yaml'),Loader=yaml.BaseLoader)
 
     with Dataset(dir_name+'/avg_spectra.nc') as d:
@@ -118,7 +137,11 @@ class AMRWindStats(ABLStats):
     
 class PedersonData(ABLStats):
   """ABLStats class specific to Pederson2014 data"""
-  def __init__(self, dir_name, ufile='Pedersen2014_N07_velocity.csv',tfile='Pedersen2014_N07_temperature.csv',skiprows=0):
+  def __init__(self, dir_name, 
+               ufile='Pedersen2014_N07_velocity.csv',
+               tfile='Pedersen2014_N07_temperature.csv',
+               tfluxfile='',
+               skiprows=0):
     self.istats = yaml.load(open(dir_name+'/istats.yaml'),Loader=yaml.BaseLoader)
     a = pd.read_csv(dir_name+'/'+ufile,header=None,skiprows=skiprows,names=['hvelmag','z'],dtype=float)
     self.z = a['z'].values * float(self.istats['zi'])
@@ -134,4 +157,16 @@ class PedersonData(ABLStats):
       "<w'w'>" : [],
     }
 
-        
+    if len(tfluxfile)>0:
+      a = pd.read_csv(dir_name+'/'+tfluxfile,header=None,skiprows=skiprows,names=['wtheta','zh'],dtype=float)
+      self.tflux_var = {
+        "<T'u'>" : [],
+        "<T'v'>" : [],
+        "<T'w'>" : np.interp(self.z, a['zh'].values[:]*float(self.istats['zi']), a['wtheta'].values[:]),
+      }            
+    else:
+      self.tflux_var = {
+        "<T'u'>" : [],
+        "<T'v'>" : [],
+        "<T'w'>" : [],
+      }      
