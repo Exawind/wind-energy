@@ -71,8 +71,8 @@ class NaluWindStats(ABLStats):
         "<v'w'>" : [],
         "<w'w'>" : [],
       }
-    if (len(glob.glob(dir_name+'/*temperaturefluxes.dat'))>0):
-      tfluxes_file = glob.glob(dir_name+'/*temperaturefluxes.dat')[0]
+    if (len(glob.glob(dir_name+'/*_temperaturefluxes.dat'))>0):
+      tfluxes_file = glob.glob(dir_name+'/*_temperaturefluxes.dat')[0]
       a = pd.read_csv(tfluxes_file, sep='\s+', skiprows=1, names=['z','Tu', 'Tv', 'Tw'] )
       self.tflux_var = {
         "<T'u'>" : a["Tu"],
@@ -81,6 +81,20 @@ class NaluWindStats(ABLStats):
       }      
     else:
       self.tflux_var = {
+        "<T'u'>" : [],
+        "<T'v'>" : [],
+        "<T'w'>" : [],
+      }      
+    if (len(glob.glob(dir_name+'/*_sfstemperaturefluxes.dat'))>0):
+      tfluxes_file = glob.glob(dir_name+'/*_sfstemperaturefluxes.dat')[0]
+      a = pd.read_csv(tfluxes_file, sep='\s+', skiprows=1, names=['z','Tu', 'Tv', 'Tw'] )
+      self.sfstflux_var = {
+        "<T'u'>" : a["Tu"],
+        "<T'v'>" : a["Tv"],
+        "<T'w'>" : a["Tw"],
+      }      
+    else:
+      self.sfstflux_var = {
         "<T'u'>" : [],
         "<T'v'>" : [],
         "<T'w'>" : [],
@@ -122,6 +136,11 @@ class AMRWindStats(ABLStats):
       "<T'u'>" : a["<temperature0'u'>"],
       "<T'v'>" : a["<temperature0'v'>"],
       "<T'w'>" : a["<temperature0'w'>"],
+    }      
+    self.sfstflux_var = {
+      "<T'u'>" : [],
+      "<T'v'>" : [],
+      "<T'w'>" : [],
     }      
     self.istats = yaml.load(open(dir_name+'/istats.yaml'),Loader=yaml.BaseLoader)
 
@@ -170,3 +189,8 @@ class PedersonData(ABLStats):
         "<T'v'>" : [],
         "<T'w'>" : [],
       }      
+    self.sfstflux_var = {
+      "<T'u'>" : [],
+      "<T'v'>" : [],
+      "<T'w'>" : [],
+    }      
