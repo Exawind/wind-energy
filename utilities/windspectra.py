@@ -17,7 +17,7 @@ def tukeyWindow(N, params={'alpha':0.1}):
     alpha = params['alpha']
     w = np.zeros(N)
     L = N+1
-    for n in np.arange(0, N/2 + 1):
+    for n in np.arange(0, int(N//2) + 1):
         if ((0 <= n) and (n < 0.5*alpha*L)):
             w[n] = 0.5*(1.0 - np.cos(2*np.pi*n/(alpha*L)))
         elif ((0.5*alpha*L <= n) and (n <= N/2)):
@@ -36,8 +36,8 @@ def getFFT(t, y):
     FFTy = np.fft.fft(y) # /(len(y))
     
     # Take the one sided version of it
-    freq = frq[range(n/2)]
-    FFTy = FFTy[range(n/2)]
+    freq = frq[range(int(n//2))]
+    FFTy = FFTy[range(int(n//2))]
     return freq, FFTy
 
 # Takes a wind speed signal ws and returns the spectra
