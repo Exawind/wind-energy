@@ -173,3 +173,46 @@ def avgSpectraFiles(planefilelist, zheight, datadir='.',verbose=True, avgbins=[]
     Sww_avg = Sww_avg/iplane
     if verbose: print("Averaged over %i planes"%iplane)
     return favg, Suu_avg, Svv_avg, Sww_avg, np.mean(all_ulongavgs)
+
+def NarrowToOctaveBand(freq, dat, n):
+    """
+    Convert dat from narrowband freq to 1/n octave band
+    """
+    df = np.mean(np.diff(freq))
+    lowf  = 1000 # Start at 1000 Hz
+    prevf = lowf*(2**(1.0/n))
+    while (prevf-lowf)>df:
+        prevf = lowf
+        lowf  = lowf/(2**(1.0/n))
+
+    # Calculate center frequencies
+    fcenter = [lowf]
+    while (fcenter[-1] < max(freq)):
+        fcenter.append(fcenter[-1]*(2**(1.0/n)))
+    # Calculate low, high, and bandwidth from center frequencies
+    flow  = [f/np.sqrt(2**(1.0/n)) for f in fcenter]
+    fhigh = [f*np.sqrt(2**(1.0/n)) for f in fcenter]
+    bandw = np.array(fhigh)-np.array(flow)
+
+    # bin the data
+    bindat   = np.zeros(len(fcenter))
+    bincount = np.zeros(len(fcenter))
+    for fi, f in enumerate(freq):
+        for j in range(len(fcenter)):
+            if ((flow[j]<= f) and (f<fhigh[j])): 
+                bincount[j] += 1
+                bindat[j]   += dat[fi]
+                break
+
+    avgdat  = []
+    avgflow = []
+    avgfc   = []
+    avgfhigh= []
+    for i in range(len(fcenter)): 
+        if bincount[i]>0:
+            avgdat.append(bindat[i]/bincount[i])
+            avgfc.append(fcenter[i])
+            avgflow.append(flow[i])
+            avgfhigh.append(fhigh[i])
+
+    return np.array(avgfc), np.array(avgdat)
