@@ -101,13 +101,14 @@ class NaluWindStats(ABLStats):
       }
 
     spectra_files = glob.glob(dir_name+'/*spectra*dat')
-    self.ps_data = {
-      'z': np.array(sorted([ float(pathlib.Path(i).stem.split('_')[-1][1:]) for i in spectra_files])),
-      'f': pd.read_csv(spectra_files[0],sep='\s+',skiprows=1,header=None,usecols=[0]).values[:,0],
-      'suu': np.array([pd.read_csv(i,sep='\s+',skiprows=1,header=None,usecols=[1]).values[:,0] for i in spectra_files ] ),
-      'svv': np.array([pd.read_csv(i,sep='\s+',skiprows=1,header=None,usecols=[2]).values[:,0] for i in spectra_files ] ),
-      'sww': np.array([pd.read_csv(i,sep='\s+',skiprows=1,header=None,usecols=[3]).values[:,0] for i in spectra_files ] )
-    }
+    if (len(spectra_files)>0):
+      self.ps_data = {
+        'z': np.array(sorted([ float(pathlib.Path(i).stem.split('_')[-1][1:]) for i in spectra_files])),
+        'f': pd.read_csv(spectra_files[0],sep='\s+',skiprows=1,header=None,usecols=[0]).values[:,0],
+        'suu': np.array([pd.read_csv(i,sep='\s+',skiprows=1,header=None,usecols=[1]).values[:,0] for i in spectra_files ] ),
+        'svv': np.array([pd.read_csv(i,sep='\s+',skiprows=1,header=None,usecols=[2]).values[:,0] for i in spectra_files ] ),
+        'sww': np.array([pd.read_csv(i,sep='\s+',skiprows=1,header=None,usecols=[3]).values[:,0] for i in spectra_files ] )
+      }
     try:
       self.istats = yaml.load(open(dir_name+'/istats.yaml'),Loader=yaml.BaseLoader)
     except:
