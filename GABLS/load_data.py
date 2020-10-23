@@ -54,7 +54,18 @@ class NaluWindStats(ABLStats):
     temp_file = glob.glob(dir_name+'/*temperature.dat')[0]
     a = pd.read_csv(temp_file, sep='\s+', skiprows=1, names=['z','T'] )
     self.T = a['T'].values
-
+    restress_file = glob.glob(dir_name+'/*reynoldsstresses.dat')[0]
+    a = pd.read_csv(restress_file, sep='\s+', skiprows=1, names=['z','uu', 'uv', 'uw','vv','vw','ww','tke'] )
+    self.vel_var = {
+      "z": a["z"],
+      "<u'u'>" : a["uu"],
+      "<u'v'>" : a["uv"],
+      "<u'w'>" : a["uw"],
+      "<v'v'>" : a["vv"],
+      "<v'w'>" : a["vw"],
+      "<w'w'>" : a["ww"],
+    }
+    
     spectra_files = glob.glob(dir_name+'/*spectra*dat')
     if (len(spectra_files)>0):
       self.ps_data = {
@@ -102,7 +113,36 @@ class AMRWindStats(ABLStats):
     #     'svv': d.variables['svv'][:,:],
     #     'sww': d.variables['sww'][:,:]
     #   }
-    
+
+class AMRWind2Stats(ABLStats):
+  """ABLStats class specific to AMRWind output using netcdf"""
+  def __init__(self,dir_name):
+    a = pd.read_csv(dir_name+'/line_average_data.csv')
+    self.z = a['z'].values
+    self.u = a['u'].values
+    self.v = a['v'].values
+    self.w = a['w'].values
+    self.hvelmag = a['hvelmag'].values
+    self.T = a['theta'].values
+    self.vel_var = {
+      "z": a["z"],
+      "<u'u'>" : a["u'u'_r"],
+      "<u'v'>" : a["u'v'_r"],
+      "<u'w'>" : a["u'w'_r"],
+      "<v'v'>" : a["v'v'_r"],
+      "<v'w'>" : a["v'w'_r"],
+      "<w'w'>" : a["w'w'_r"],
+      "<w'w'w'>": a["w'w'w'_r"]
+    }
+    self.istats = yaml.load(open(dir_name+'/istats.yaml'),Loader=yaml.BaseLoader)
+    with Dataset(dir_name+'/avg_spectra.nc') as d:
+      self.ps_data = {
+        'z': d.variables['z'][:],
+        'f': d.variables['f'][:],
+        'suu': d.variables['suu'][:,:],
+        'svv': d.variables['svv'][:,:],
+        'sww': d.variables['sww'][:,:]
+      }      
     
 class PedersonData(ABLStats):
   """ABLStats class specific to Pederson2014 data"""
@@ -126,7 +166,9 @@ class GABLSData(ABLStats):
     print("Reading ",  glob.glob(dir_name+'/*B9*dat')[0] ) 
     a = gabls.readdata( glob.glob(dir_name+'/*B9*dat')[0])
     b = gabls.readdata( glob.glob(dir_name+'/*C9*dat')[0])
+    print(np.size(a[:,0]), np.size(b[:,1]))
     self.vel_var = {
+      "z": a[:,0],
       "<u'u'>" : a[:,1],
       "<u'v'>" : a[:,2],
       "<u'w'>" : b[:,1],
