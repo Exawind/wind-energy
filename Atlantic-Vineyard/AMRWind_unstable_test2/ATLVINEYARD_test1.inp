@@ -1,0 +1,172 @@
+#---------------------------------------#
+#            SIMULATION STOP            #
+#---------------------------------------#
+time.stop_time                 = 43200.0                        # Max (simulated) time to evolve
+time.max_step                  = 172800                          # Max number of time steps
+#---------------------------------------#
+#         TIME STEP COMPUTATION         #
+#---------------------------------------#
+time.fixed_dt                  = 0.25                            # Use this constant dt if > 0
+time.cfl                       = 0.95                           # CFL factor
+#---------------------------------------#
+#            INPUT AND OUTPUT           #
+#---------------------------------------#
+time.plot_interval             = 20000                           # Steps between plot files
+time.checkpoint_interval       = 20000                           # Steps between checkpoint files
+io.KE_int                      = 1                              
+io.line_plot_int               = 1                              
+# io.restart_file = "../amrwind_wenoz/chk30000"                 # Use this to restart
+#---------------------------------------#
+#               PHYSICS                 #
+#---------------------------------------#
+incflo.gravity                 = 0.0 0.0 -9.81                  # Gravitational force (3D)
+incflo.density                 = 1.0                           # Reference density
+transport.viscosity            = 1.8375e-05                     
+transport.laminar_prandtl      = 0.7                            
+transport.turbulent_prandtl    = 0.3333                         
+#turbulence.model               = Smagorinsky                    
+#Smagorinsky_coeffs.Cs          = 0.135         
+turbulence.model               = OneEqKsgsM84                 
+
+# ABL forcing
+#ICNS.source_terms              = BoussinesqBuoyancy CoriolisForcing ABLForcing # ABLMeanBoussinesq 
+# WRF forcing 
+ICNS.source_terms              = ABLWrfForcingMom BoussinesqBuoyancy CoriolisForcing 
+ABL.WRFforcing                 = wrfforcing.nc        # WRF forcing file
+Temperature.source_terms       = ABLWrfForcingTemp    # Add this to include temperature forcing
+ABLWrfForcingMom.forcing_scheme  = direct               # [direct/indirect]
+ABLWrfForcingMom.control_gain    = 0.2                  # 0.2 is default
+ABLWrfForcingTemp.forcing_scheme = direct               # [direct/indirect]
+ABLWrfForcingTemp.control_gain   = 0.2                  # 0.2 is default
+TKE.source_terms               = KsgsM84Src
+BoussinesqBuoyancy.reference_temperature = 288.15                         
+ABLForcing.abl_forcing_height  = 57.19                          
+incflo.velocity                = 4.70059422901 3.93463008353 0.0 
+ABL.reference_temperature      = 288.15
+ABL.temperature_heights        = 1050.0 1150.0 1920.0           
+ABL.temperature_values         = 288.15 296.15 296.9            
+ABL.kappa                      = 0.4                            
+ABL.surface_roughness_z0       = 0.0001                         
+ABL.perturb_temperature        = false   #true 
+ABL.theta_perturb              = 0.8
+ABL.cutoff_height              = 800.0
+ABL.random_gauss_mean          = 0.0
+ABL.random_gauss_var           = 1.0
+ABL.mo_beta_m  = 16.0
+ABL.mo_gamma_m = 5.0
+ABL.mo_gamma_h = 5.0
+ABL.surface_temp_flux          = 0.01220961466456118644 
+ABL.normal_direction = 2
+ABL.stats_output_frequency = 1
+ABL.stats_output_format = netcdf
+# Coriolis forcing
+CoriolisForcing.latitude       = 41.5              # Same as Cape Wind tower                          
+CoriolisForcing.east_vector    = 1.0 0.0 0.0                    
+CoriolisForcing.north_vector   = 0.0 1.0 0.0                    
+CoriolisForcing.rotational_time_period = 86164.0900027                  
+incflo.use_godunov             = 1                              
+incflo.use_godunov = 1
+incflo.godunov_type = "weno_z"
+incflo.physics                 = ABL                            
+
+#---------------------------------------#
+#        ADAPTIVE MESH REFINEMENT       #
+#---------------------------------------#
+amr.n_cell                     = 192 192 192                    # Grid cells at coarsest AMRlevel
+amr.max_level                  = 0                              # Max AMR level in hierarchy
+
+#---------------------------------------#
+#              GEOMETRY                 #
+#---------------------------------------#
+geometry.prob_lo               = 0.0 0.0 0.0                    # Lo corner coordinates
+geometry.prob_hi               = 1920.0 1920.0 1920.0           # Hi corner coordinates
+geometry.is_periodic           = 1 1 0                          # Periodicity x y z (0/1)
+# Boundary conditions
+zlo.type                       =   "wall_model"
+zlo.temperature_type           =   "wall_model"
+zlo.tke_type                   =   "zero_gradient"
+zhi.type                       =   "slip_wall"
+zhi.temperature_type           =   "fixed_gradient"
+zhi.temperature                =    0.000974025974 # tracer is used to specify potential temperature gradient
+
+# # Boundary conditions for inflow outflow
+# xlo.type = "mass_inflow"
+# xlo.density = 1.0
+# xhi.type = "pressure_outflow"
+
+# xlo.temperature=0
+# xlo.tke=0
+
+#
+#---------------------------------------#
+#              VERBOSITY                #
+#---------------------------------------#
+incflo.verbose                 = 3                              # incflo.level
+#---------------------------------------#
+#              DEBUGGING                #
+#---------------------------------------#
+#possible debugging parameters
+amrex.fpe_trap_invalid         = 0                              # Trap NaNs
+# MLMG settings
+nodal_proj.mg_rtol = 1.0e-6
+nodal_proj.mg_atol = 1.0e-12
+mac_proj.mg_rtol = 1.0e-6
+mac_proj.mg_atol = 1.0e-12
+diffusion.mg_rtol = 1.0e-6
+diffusion.mg_atol = 1.0e-12
+temperature_diffusion.mg_rtol = 1.0e-10
+temperature_diffusion.mg_atol = 1.0e-13
+#diffusion.mg_verbose           = 0                              
+#diffusion.mg_cg_verbose        = 0                              
+#diffusion.mg_rtol              = 1e-06                          
+#diffusion.mg_atol              = 1e-08                          
+#mac_proj.mg_rtol               = 1e-06                          
+#mac_proj.mg_atol               = 1e-08                          
+#nodal_proj.mg_verbose          = 0                              
+#nodal_proj.mg_rtol             = 1e-06                          
+#nodal_proj.mg_atol             = 1e-08                          
+#¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨#
+#              Sampling                 #
+#.......................................#
+incflo.post_processing = sampling
+# Frequency of output for the data
+sampling.output_frequency = 100
+sampling.labels = p_hub xbc ybc
+# Fields to output
+sampling.fields = velocity temperature
+
+# Definitions for each probe
+sampling.p_hub.type = PlaneSampler
+sampling.p_hub.axis1 = 1920.0 0.0 0.0
+sampling.p_hub.axis2 = 0.0 1920.0 0.0
+sampling.p_hub.origin = 0.0 0.0 0.0
+sampling.p_hub.num_points = 193 193
+sampling.p_hub.normal = 0.0 0.0 1.0
+sampling.p_hub.offsets = 50 100 150 200 250 500  
+
+# Definitions for each probe
+sampling.xbc.type = PlaneSampler
+sampling.xbc.num_points = 193 193 
+sampling.xbc.axis1  = 0.0 1920.0 0.0
+sampling.xbc.axis2  = 0.0 0.0 1920.0
+sampling.xbc.origin = 0.0 0.0 0.0
+sampling.xbc.normal = 1.0 0.0 0.0
+sampling.xbc.offsets = 0.0 1920
+
+# Definitions for each probe
+sampling.ybc.type = PlaneSampler
+sampling.ybc.num_points = 193 193
+sampling.ybc.axis1  = 1920.0 0.0 0.0
+sampling.ybc.axis2  = 0.0 0.0 1920.0
+sampling.ybc.origin = 0.0 0.0 0.0
+sampling.ybc.normal = 0.0 1.0 0.0
+sampling.ybc.offsets = 0.0 1920
+
+# #¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨#
+# # Boundary data sampling for IO         #
+# #.......................................#
+# ABL.bndry_file = "../amrwind_wenoz/bndry_file.nc"
+# ABL.bndry_io_mode = 1 
+# ABL.bndry_planes = xlo
+# ABL.bndry_output_start_time = 15000.0
+# ABL.bndry_var_names = velocity temperature tke
