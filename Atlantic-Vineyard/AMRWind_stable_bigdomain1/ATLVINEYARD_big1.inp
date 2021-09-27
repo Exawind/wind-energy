@@ -1,0 +1,140 @@
+# --- Simulation time control parameters ---
+time.stop_time                           = 43200.0             # Max (simulated) time to evolve [s]
+time.max_step                            = -172800              
+time.fixed_dt                            = 0.10                # Fixed timestep size (in seconds). If negative, then time.cfl is used
+time.cfl                                 = 0.95                # CFL factor
+time.checkpoint_interval                 = 20000               
+incflo.physics                           = ABL                 # List of physics models to include in simulation.
+incflo.verbose                           = 3                   
+io.check_file                            = chk                 
+incflo.use_godunov                       = true                
+incflo.godunov_type                      = weno_z              
+turbulence.model                         = OneEqKsgsM84        
+TKE.source_terms                         = KsgsM84Src          
+nodal_proj.mg_rtol                       = 1e-06               
+nodal_proj.mg_atol                       = 1e-12               
+mac_proj.mg_rtol                         = 1e-06               
+mac_proj.mg_atol                         = 1e-12               
+diffusion.mg_rtol                        = 1e-06               
+diffusion.mg_atol                        = 1e-12               
+temperature_diffusion.mg_rtol            = 1e-10               
+temperature_diffusion.mg_atol            = 1e-13               
+incflo.gravity                           = 0.0 0.0 -9.81       # Gravitational acceleration vector (x,y,z) [m/s^2]
+incflo.density                           = 1.0                 # Fluid density [kg/m^3]
+transport.viscosity                      = 1.8375e-05          # Fluid dynamic viscosity [kg/m-s]
+transport.laminar_prandtl                = 0.7                 # Laminar prandtl number
+transport.turbulent_prandtl              = 0.3333              # Turbulent prandtl number
+
+# --- Geometry and Mesh ---
+geometry.prob_lo                         = 0.0 0.0 0.0         
+geometry.prob_hi                         = 5120.0 10240.0 2560.0
+amr.n_cell                               = 64 128 32           # Number of cells in x, y, and z directions
+amr.max_level                            = 3                   
+geometry.is_periodic                     = 1 1 0               
+zlo.type                                 = wall_model          
+zlo.temperature_type                     = wall_model          
+zlo.tke_type                             = zero_gradient       
+zhi.type                                 = slip_wall           
+zhi.temperature_type                     = fixed_gradient      
+zhi.temperature                          = 0.000974025974      
+
+# --- ABL parameters ---
+ICNS.source_terms                        =  BoussinesqBuoyancy CoriolisForcing ABLWrfForcingMom
+incflo.velocity                          = 4.70059422901 3.93463008353 0.0
+ABLForcing.abl_forcing_height            = 57.19               
+ABL.random_gauss_mean                    = 0.0                 
+ABL.random_gauss_var                     = 1.0                 
+CoriolisForcing.latitude                 = 41.5                
+CoriolisForcing.rotational_time_period   = 86164.0900027       
+CoriolisForcing.north_vector             = 0.0 1.0 0.0         
+CoriolisForcing.east_vector              = 1.0 0.0 0.0         
+BoussinesqBuoyancy.reference_temperature = 288.15              
+time.plot_interval                       = 20000               
+io.plot_file                             = plt                 
+io.KE_int                                = 1                   
+incflo.post_processing                   = sampling            
+
+ABL.reference_temperature                = 288.15
+ABL.temperature_heights                  = 1050.0 1150.0 1920.0
+ABL.temperature_values                   = 288.15 296.15 296.9
+ABL.kappa                                = 0.4
+ABL.surface_roughness_z0                 = 0.0001
+ABL.perturb_temperature                  = false   #true
+ABL.theta_perturb                        = 0.8
+ABL.cutoff_height                        = 800.0
+ABL.random_gauss_mean                    = 0.0
+ABL.random_gauss_var                     = 1.0
+ABL.mo_beta_m                            = 16.0
+ABL.mo_gamma_m                           = 5.0
+ABL.mo_gamma_h                           = 5.0
+ABL.surface_temp_flux                    = 0.01220961466456118644
+ABL.normal_direction                     = 2
+ABL.stats_output_frequency               = 1
+ABL.stats_output_format                  = netcdf
+
+# --- Sampling parameters ---
+sampling.output_frequency                = 100                 
+sampling.fields                          = velocity temperature
+
+#---- sample defs ----
+sampling.labels                          = p_hub xbc ybc       
+sampling.p_hub.type                      = PlaneSampler        
+sampling.p_hub.num_points                = 129 257             
+sampling.p_hub.origin                    = 0.0 0.0 0.0         
+sampling.p_hub.axis1                     = 5120.0 0.0 0.0      
+sampling.p_hub.axis2                     = 0.0 10240.0 0.0     
+sampling.p_hub.normal                    = 0.0 0.0 1.0         
+sampling.p_hub.offsets                   = 50 100 150 200 250 500
+sampling.xbc.type                        = PlaneSampler        
+sampling.xbc.num_points                  = 129 65              
+sampling.xbc.origin                      = 0.0 0.0 0.0         
+sampling.xbc.axis1                       = 0.0 10240.0 0.0     
+sampling.xbc.axis2                       = 0.0 0.0 2560.0      
+sampling.xbc.normal                      = 1.0 0.0 0.0         
+sampling.xbc.offsets                     = 0.0                 
+sampling.ybc.type                        = PlaneSampler        
+sampling.ybc.num_points                  = 129 65              
+sampling.ybc.origin                      = 0.0 0.0 0.0         
+sampling.ybc.axis1                       = 5120.0 0.0 0.0      
+sampling.ybc.axis2                       = 0.0 0.0 2560.0      
+sampling.ybc.normal                      = 0.0 1.0 0.0         
+sampling.ybc.offsets                     = 0.0                 
+
+#---- tagging defs ----
+tagging.labels                           = box40 box20 box10   
+tagging.box40.type                       = GeometryRefinement  
+tagging.box40.shapes                     = box40               
+tagging.box40.level                      = 0                   
+tagging.box40.box40.type                 = box                 
+tagging.box40.box40.origin               = 500.0 1000.0 0.0    
+tagging.box40.box40.xaxis                = 4000.0 0.0 0.0      
+tagging.box40.box40.yaxis                = 0.0 8000.0 0.0      
+tagging.box40.box40.zaxis                = 0.0 0.0 1600.0      
+tagging.box20.type                       = GeometryRefinement  
+tagging.box20.shapes                     = box20               
+tagging.box20.level                      = 1                   
+tagging.box20.box20.type                 = box                 
+tagging.box20.box20.origin               = 1000.0 2000.0 0.0   
+tagging.box20.box20.xaxis                = 3000.0 0.0 0.0      
+tagging.box20.box20.yaxis                = 0.0 6000.0 0.0      
+tagging.box20.box20.zaxis                = 0.0 0.0 1000.0      
+tagging.box10.type                       = GeometryRefinement  
+tagging.box10.shapes                     = box10               
+tagging.box10.level                      = 2                   
+tagging.box10.box10.type                 = box                 
+tagging.box10.box10.origin               = 1500.0 2500.0 0.0   
+tagging.box10.box10.xaxis                = 2000.0 0.0 0.0      
+tagging.box10.box10.yaxis                = 0.0 5000.0 0.0      
+tagging.box10.box10.zaxis                = 0.0 0.0 500.0       
+
+#---- extra params ----
+io.line_plot_int                         = 1                   
+ABL.WRFforcing                           = wrfforcing.nc       
+Temperature.source_terms                 = ABLWrfForcingTemp   
+ABLWrfForcingMom.forcing_scheme          = direct              
+ABLWrfForcingMom.control_gain            = 0.2                 
+ABLWrfForcingTemp.forcing_scheme         = direct              
+ABLWrfForcingTemp.control_gain           = 0.2                 
+ABL.theta_perturb                        = 0.8                 
+amrex.fpe_trap_invalid                   = 0                   
+#== END AMR-WIND INPUT ==
