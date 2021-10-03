@@ -66,6 +66,23 @@ def readplainfile(filename, splitfirstcol=False):
   else:
     return npoutput
 
+def readSOWFAresult(filename):
+  SOWFAdat = np.loadtxt(filename)
+  # Get the number of unique z's
+  allz      = SOWFAdat[:,0]
+  uniquez   = np.unique(allz)
+  blocksize = len(uniquez)
+  datashape = SOWFAdat.shape
+  Ntimes    = int(datashape[0]/blocksize)
+  Ncols     = datashape[1]
+  #print(Ntimes, blocksize, Ncols)
+  # Reshape the data
+  returndat = np.zeros((Ntimes, blocksize, Ncols))
+  for i in range(Ntimes):
+    istart = i*blocksize
+    iend   = (i+1)*blocksize
+    returndat[i,:,:] = SOWFAdat[istart:iend,:]
+  return returndat
 
 if __name__ == "__main__":
   # TEST functions here

@@ -14,7 +14,7 @@ import SOWFAdata as sowfa
 
 profiledir = 'profiledata'
 casedir    = './'
-prefix     = 'AMRWind_winterunstable_'
+prefix     = 'AMRWind_summerstable_'
 #timevec=[48, 72, 96, 108, 144]   # Every 12 iter is 1 hr
 timevec=[12*(x+1) for x in range(12)]   # Every 12 iter is 1 hr
 
@@ -30,7 +30,7 @@ tutorial2.ABLpostpro_loadnetcdffile(casedir+'/post_processing/abl_statistics0000
 
 for it, time in enumerate(timevec):
     print('Time = %0.1f'%sowfatime[time])
-    plotvars=['velocity', 'Uhoriz', 'Temperature', 'TKE', 'ReStresses']
+    plotvars=['velocity', 'Uhoriz', 'Temperature', 'TKE', 'ReStresses', 'Tfluxes']
     #plotvars=['Temperature', 'velocity']
     dat=tutorial2.ABLpostpro_plotprofiles(ax=None, plotvars=plotvars,
                                           avgt=[sowfatime[time]-5, sowfatime[time]+5], 
@@ -64,3 +64,11 @@ for it, time in enumerate(timevec):
     filename=profiledir+'/'+prefix+'reynoldsstresses_%06.0f.dat'%sowfatime[time]
     np.savetxt(filename, writedat.transpose(), header='z uu uv uw vv vw ww TKE')
 
+    # Write Tflux profiles
+    writedat=np.vstack((dat['uT']['z'], 
+                        dat['uT']['data'], 
+                        dat['vT']['data'], 
+                        dat['wT']['data'],
+                    ))
+    filename=profiledir+'/'+prefix+'temperaturefluxes_%06.0f.dat'%sowfatime[time]
+    np.savetxt(filename, writedat.transpose(), header='z uT vT wT')
