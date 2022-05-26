@@ -1,4 +1,4 @@
-git clone https://github.com/Exawind/amr-wind.git
+git clone --recursive https://github.com/Exawind/amr-wind.git
 cd amr-wind
 mkdir build
 cd build
@@ -7,7 +7,6 @@ module unload xl
 module load gcc
 module load cuda
 module load cmake
-#module load netcdf-c
 
 cmake -DCMAKE_INSTALL_PREFIX:PATH=./install \
       -DCMAKE_BUILD_TYPE:STRING=Release \
@@ -23,3 +22,4 @@ cmake -DCMAKE_INSTALL_PREFIX:PATH=./install \
       -DAMR_WIND_ENABLE_CUDA:BOOL=ON \
       ..
 
+make -j12
